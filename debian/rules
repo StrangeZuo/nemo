@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+# Force UTF8 to workaround build error
+export LC_ALL=C.UTF-8
+
+CONFIGURE_EXTRA_FLAGS = \
+	--libexecdir=/usr/lib/$(DEB_HOST_MULTIARCH)/nemo \
+	-D deprecated_warnings=false \
+	-D gtk_doc=true \
+	-D selinux=true
+
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,-O1 -Wl,--as-needed
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(CONFIGURE_EXTRA_FLAGS)
+
+override_dh_auto_test:
+	# Disabled
+	:
+
+override_dh_python3:
+	dh_python3 -p nemo-data /usr/share/nemo
+
