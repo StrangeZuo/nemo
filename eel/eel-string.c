@@ -70,9 +70,9 @@ eel_str_double_underscores (const char *string)
 }
 
 char *
-eel_str_escape_spaces (const char *string)
+eel_str_escape_shell_characters (const char *string)
 {
-    int spaces;
+    int escape_characters;
     const char *p;
     char *q;
     char *escaped;
@@ -81,20 +81,53 @@ eel_str_escape_spaces (const char *string)
         return NULL;
     }
 
-    spaces = 0;
+    escape_characters = 0;
     for (p = string; *p != '\0'; p++) {
-        spaces += (*p == ' ');
+        switch (*p) {
+        case '\n':
+            escape_characters += 2;
+            break;
+
+        case ' ':
+        case '\t':
+        case '\'':
+        case '"':
+        case '\\':
+        case '#':
+            escape_characters++;
+            break;
+
+        default:
+            break;
+        }
     }
 
-    if (spaces == 0) {
+    if (escape_characters == 0) {
         return g_strdup (string);
     }
 
-    escaped = g_new (char, strlen (string) + spaces + 1);
+    escaped = g_new (char, strlen (string) + escape_characters + 1);
     for (p = string, q = escaped; *p != '\0'; p++, q++) {
-        /* Add an extra underscore. */
-        if (*p == ' ') {
+        switch (*p) {
+        case '\n':
+            /* Quote newlines, as backslash-newline becomes nothing */
+            q[0] = '\'';
+            q[1] = '\n';
+            q[2] = '\'';
+            q += 3;
+            continue;
+
+        case ' ':
+        case '\t':
+        case '\'':
+        case '"':
+        case '\\':
+        case '#':
             *q++ = '\\';
+            break;
+
+        default:
+            break;
         }
         *q = *p;
     }
@@ -104,9 +137,9 @@ eel_str_escape_spaces (const char *string)
 }
 
 char *
-eel_str_escape_quotes (const char *string)
+eel_str_escape_double_quoted_content (const char *string)
 {
-    int quotes;
+    int double_quotes_and_backslashes;
     const char *p;
     char *q;
     char *escaped;
@@ -115,18 +148,18 @@ eel_str_escape_quotes (const char *string)
         return NULL;
     }
 
-    quotes = 0;
+    double_quotes_and_backslashes = 0;
     for (p = string; *p != '\0'; p++) {
-        quotes += (*p == '\'') || (*p == '\"');
+        double_quotes_and_backslashes += (*p == '\"') || (*p == '\\');
     }
 
-    if (quotes == 0) {
+    if (double_quotes_and_backslashes == 0) {
         return g_strdup (string);
     }
 
-    escaped = g_new (char, strlen (string) + quotes + 1);
+    escaped = g_new (char, strlen (string) + double_quotes_and_backslashes + 1);
     for (p = string, q = escaped; *p != '\0'; p++, q++) {
-        if ((*p == '\'') || (*p == '\"')) {
+        if ((*p == '\"') || (*p == '\\')) {
             *q++ = '\\';
         }
         *q = *p;
@@ -649,105 +682,6 @@ eel_strdup_printf_with_custom (EelPrintfHandler *handlers,
 	va_end (va);
 
 	return res;
-}
-
-/*********** refcounted strings ****************/
-
-G_LOCK_DEFINE_STATIC (unique_ref_strs);
-static GHashTable *unique_ref_strs = NULL;
-
-static eel_ref_str
-eel_ref_str_new_internal (const char *string, int start_count)
-{
-	char *res;
-	volatile gint *count;
-	gsize len;
-
-	len = strlen (string);
-	res = g_malloc (sizeof (gint) + len + 1);
-	count = (volatile gint *)res;
-	*count = start_count;
-	res += sizeof(gint);
-	memcpy (res, string, len + 1);
-	return res;
-}
-
-eel_ref_str
-eel_ref_str_new (const char *string)
-{
-	if (string == NULL) {
-		return NULL;
-	}
-
-	return eel_ref_str_new_internal (string, 1);
-}
-
-eel_ref_str
-eel_ref_str_get_unique (const char *string)
-{
-	eel_ref_str res;
-
-	if (string == NULL) {
-		return NULL;
-	}
-
-	G_LOCK (unique_ref_strs);
-	if (unique_ref_strs == NULL) {
-		unique_ref_strs =
-			g_hash_table_new (g_str_hash, g_str_equal);
-	}
-
-	res = g_hash_table_lookup (unique_ref_strs, string);
-	if (res != NULL) {
-		eel_ref_str_ref (res);
-	} else {
-		res = eel_ref_str_new_internal (string, 0x80000001);
-		g_hash_table_insert (unique_ref_strs, res, res);
-	}
-
-	G_UNLOCK (unique_ref_strs);
-
-	return res;
-}
-
-eel_ref_str
-eel_ref_str_ref (eel_ref_str str)
-{
-	volatile gint *count;
-
-	count = (volatile gint *)((char *)str - sizeof (gint));
-	g_atomic_int_add (count, 1);
-
-	return str;
-}
-
-void
-eel_ref_str_unref (eel_ref_str str)
-{
-	volatile gint *count;
-	gint old_ref;
-
-	if (str == NULL)
-		return;
-
-	count = (volatile gint *)((char *)str - sizeof (gint));
-
- retry_atomic_decrement:
-	old_ref = g_atomic_int_get (count);
-	if (old_ref == 1) {
-		g_free ((char *)count);
-	} else if (old_ref == 0x80000001) {
-		G_LOCK (unique_ref_strs);
-		/* Need to recheck after taking lock to avoid races with _get_unique() */
-		if (g_atomic_int_add (count, -1) == 0x80000001) {
-			g_hash_table_remove (unique_ref_strs, (char *)str);
-			g_free ((char *)count);
-		}
-		G_UNLOCK (unique_ref_strs);
-	} else if (!g_atomic_int_compare_and_exchange (count,
-						       old_ref, old_ref - 1)) {
-		goto retry_atomic_decrement;
-	}
 }
 
 GList *

@@ -39,39 +39,30 @@
 /* NULL is allowed for all the str parameters to these functions. */
 
 /* Escape function for '_' character. */
-char *   eel_str_double_underscores        (const char    *str);
-/* Escape function for spaces */
-char *   eel_str_escape_spaces             (const char    *str);
-/* Escape function for quotes */
-char *   eel_str_escape_quotes             (const char    *str);
+char *   eel_str_double_underscores           (const char    *str);
+/* Escape function for special characters in a GLib shell context. */
+char *   eel_str_escape_shell_characters      (const char    *str);
+/* Escape function for content within double quotes in a GLib shell context. */
+char *   eel_str_escape_double_quoted_content (const char    *str);
 /* Capitalize a string */
-char *   eel_str_capitalize                (const char    *str);
+char *   eel_str_capitalize                   (const char    *str);
 
 /* Middle truncate a string to a maximum of truncate_length characters.
  * The resulting string will be truncated in the middle with a "..."
  * delimiter.
  */
-char *   eel_str_middle_truncate           (const char    *str,
-					    guint          truncate_length);
+char *   eel_str_middle_truncate              (const char    *str,
+					       guint          truncate_length);
 
 
 /* Remove all characters after the passed-in substring. */
-char *   eel_str_strip_substring_and_after (const char    *str,
-					    const char    *substring);
+char *   eel_str_strip_substring_and_after    (const char    *str,
+					       const char    *substring);
 
 /* Replace all occurrences of substring with replacement. */
-char *   eel_str_replace_substring         (const char    *str,
-					    const char    *substring,
-					    const char    *replacement);
-
-typedef char * eel_ref_str;
-
-eel_ref_str eel_ref_str_new        (const char  *string);
-eel_ref_str eel_ref_str_get_unique (const char  *string);
-eel_ref_str eel_ref_str_ref        (eel_ref_str  str);
-void        eel_ref_str_unref      (eel_ref_str  str);
-
-#define eel_ref_str_peek(__str) ((const char *)(__str))
+char *   eel_str_replace_substring            (const char    *str,
+					       const char    *substring,
+					       const char    *replacement);
 
 GList *eel_strv_to_glist (gchar **strv);
 

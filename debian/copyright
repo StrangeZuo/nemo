@@ -4,8 +4,7 @@ Upstream-Contact: Linux Mint Project <root@linuxmint.com>
 Source: https://github.com/linuxmint/nemo
 
 Files: *
-Copyright: 2009, Alexander Larsson
-           2007-2011, Amos Brocco
+Copyright: 2007-2011, Amos Brocco
            2002, Anders Carlsson
            2002, Bent Spoon Software
            2003-2005, Christian Persch
@@ -13,23 +12,18 @@ Copyright: 2009, Alexander Larsson
            2008-2010, Cosimo Cecchi
            2010, Cosimo Cecchi <cosimoc@gnome.org>
            2002, Darin Adler
-           2000-2001, Eazel, Inc
-           1999-2000, Free Software Foundation
-           2008, Free Software Foundation, Inc
-           1999-2000, Free Software Foundaton
-           2004, James Willcox
+           1999-2001, Eazel, Inc
+           1999-2008, Free Software Foundation
+           2002-2004, James Willcox
            2001, Maciej Stachowiak
            2003-2004, Marco Pesenti Gritti
            2007, Martin Wehner
            2005, Mr Jamie McCracken
-           2007, Novell, Inc
+           2005-2007, Novell, Inc
            2006, Paolo Borelli <pborelli@katamail.com>
-           2004, Red Hat Inc
-           1999-2000, Red Hat, Inc
+           1999-2012, Red Hat Inc
            2002, Sun Microsystems, Inc
            2005, Vincent Untz
-           1999-2000, Eazel, Inc
-           1999-2000, Red Hat Inc
 License: GPL-2+
 
 Files: cut-n-paste-code/libegg/eggtreemultidnd.c
@@ -177,23 +171,16 @@ Files: cut-n-paste-code/libegg/eggtreemultidnd.c
        src/nemo-statusbar.h
        src/nemo-window-slot-dnd.c
        src/nemo-window-slot-dnd.h
-Copyright: 2001-2002, Anders Carlsson
-           2001-2002, Anders Carlsson <andersca@gnu.org>
-           2002, Anders Carlsson, Sun Microsystems, Inc
+Copyright: 2001-2002, Anders Carlsson <andersca@gnu.org>
            1999-2001, Eazel, Inc
-           2000-2001, Eazel, Inc.mou
-           1997-2000, Free Software Foundation
-           2006, Free Software Foundation, Inc
-           1999-2000, Free Software Foundaton
+           1991-2006, Free Software Foundation, Inc
            2002, Jan Arne Petersen
            2003-2004, Novell, Inc
            1995-1997, Peter Mattis, Spencer Kimball and Josh MacDonald
            2005, Raffaele Sandrini
-           2011, Red Hat Inc
            2001-2011, Red Hat, Inc
-           2007, Red Hat, Inc., Alexander Larsson <alexl@redhat.com>
-           2004, Red Hat, Inc., Jonathan Blandford <jrb@gnome.org>
-           2009, Red Hatl, Inc
+           2007, Alexander Larsson <alexl@redhat.com>
+           2004, Jonathan Blandford <jrb@gnome.org>
            2003, Soeren Sandmann
            2002, Sun Microsystems, Inc
 License: LGPL-2+
@@ -206,8 +193,8 @@ License: Permissive
  unlimited permission to copy and/or distribute it, with or without
  modifications, as long as this notice is preserved.
 
-Files: files/usr/share/gtksourceview-2.0/language-specs/nemo_action.lang
-       files/usr/share/gtksourceview-3.0/language-specs/nemo_action.lang
+Files: data/nemo_action.lang
+       data/nemo_search_helper.lang
        libnemo-private/nemo-debug.c
        libnemo-private/nemo-debug.h
 Copyright: 2007, Collabora Ltd
@@ -221,6 +208,7 @@ Files: debian/*
 Copyright: 2012, Nicolas Bourdaud
            2012, Josselin Mouette
            2014-2015, Maximiliano Curia <maxy@debian.org>
+           2016-2024, Debian Cinnamon Team <debian-cinnamon@lists.debian.org>
 License: GPL-2+
 
 License: GPL-2+

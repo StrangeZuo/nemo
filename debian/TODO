@@ -1,0 +1,1 @@
+- split search helpers in another package (like nemo-search-helpers) as nemo recommended to make possible decrease deps of minimal installations

@@ -282,7 +282,14 @@ viewed_file_changed_callback (NemoFile *file,
 
     /* Close window if the file it's viewing has been deleted or moved to trash. */
     if (nemo_file_is_gone (file) || (is_in_trash && !was_in_trash)) {
-        if (slot->back_list == NULL) {
+        NemoFile *parent;
+        gboolean parent_is_desktop;
+
+        parent = nemo_file_get_parent (file);
+        parent_is_desktop = nemo_file_is_desktop_directory (parent);
+        nemo_file_unref (parent);
+
+        if (slot->back_list == NULL && parent_is_desktop) {
             end_location_change (slot);
             gtk_widget_destroy (GTK_WIDGET (slot->content_view));
             nemo_window_pane_close_slot (slot->pane, slot);
@@ -677,7 +684,7 @@ begin_location_change (NemoWindowSlot        *slot,
 	end_location_change (slot);
 
 	nemo_window_slot_set_allow_stop (slot, TRUE);
-	nemo_window_slot_set_status (slot, " ", NULL);
+	nemo_window_slot_set_status (slot, " ", NULL, FALSE);
 
 	g_assert (slot->pending_location == NULL);
 	g_assert (slot->pending_selection == NULL);
@@ -1003,6 +1010,10 @@ got_file_info_for_view_selection_callback (NemoFile *file,
 				g_signal_connect_object (viewed_file, "changed",
 							 G_CALLBACK (viewed_file_changed_callback), slot, 0);
 				nemo_file_unref (viewed_file);
+
+                gchar *path = nemo_file_get_path (file);
+                NEMO_WINDOW_GET_CLASS (window)->prompt_for_location(window, path);
+                g_free (path);
 
 				/* Leave the location bar showing the bad location that the user
 				 * typed (or maybe achieved by dragging or something). Many times
@@ -1432,10 +1443,14 @@ found_mount_cb (GObject *source_object,
 						    NULL);
 	if (mount != NULL) {
 		data->mount = mount;
-		nemo_get_x_content_types_for_mount_async (mount,
-							      found_content_type_cb,
-							      data->cancellable,
-							      data);
+		
+		if (g_settings_get_boolean (nemo_preferences, NEMO_PREFERENCES_MEDIA_HANDLING_DETECT_CONTENT)) {
+			nemo_get_x_content_types_for_mount_async (mount,
+											found_content_type_cb,
+											data->cancellable,
+											data);
+		}
+
 		return;
 	}
 

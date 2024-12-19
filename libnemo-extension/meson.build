@@ -61,14 +61,15 @@ nemo_extension = declare_dependency(
   dependencies: nemo_extension_deps,
 )
 
-typelibdir = go_intr.get_pkgconfig_variable('typelibdir',
-  define_variable: ['libdir', join_paths(get_option('prefix'), get_option('libdir'))]
+typelibdir = go_intr.get_variable(pkgconfig: 'typelibdir',
+  pkgconfig_define: ['libdir', join_paths(get_option('prefix'), get_option('libdir'))]
 )
 
 gnome.generate_gir(nemo_extension_lib,
   sources: nemo_extension_sources + nemo_extension_headers,
   nsversion: '3.0',
   namespace: 'Nemo',
+  export_packages: 'libnemo-extension',
   includes: [ 'Gtk-3.0', 'Gio-2.0', 'GLib-2.0', ],
   include_directories: [ rootInclude, ],
   install_dir_typelib: typelibdir,

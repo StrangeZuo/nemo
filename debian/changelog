@@ -1,3 +1,171 @@
+nemo (6.2.8-1) unstable; urgency=medium
+
+  * d/gbp.conf: change debian-branch and upstream-branch to follow DEP14
+  * New upstream version 6.2.8
+  * Update d/changelog
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sat, 19 Oct 2024 15:28:22 +0200
+
+nemo (6.2.7-1) unstable; urgency=medium
+
+  [ Joshua Peisach ]
+  * New upstream version 6.2.7
+  * Add libjson-glib-dev to build deps
+  * Bump deps and reverse dep breaks to 6.2
+
+  [ Fabio Fantoni ]
+  * Update standards version to 4.7.0, no changes needed
+  * Add d/README.source with a wiki link with details about packaging
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Fri, 04 Oct 2024 18:56:34 +0200
+
+nemo (6.0.2-2) unstable; urgency=medium
+
+  * Release to unstable
+  * d/control: remove hardcoded libcinnamon-desktop4 dep in nemo
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 31 Mar 2024 20:19:55 +0200
+
+nemo (6.0.2-1) experimental; urgency=medium
+
+  * New upstream version 6.0.2
+  * Update d/copyright
+  * Bump deps and reverse dep breaks to 6.0
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 11 Feb 2024 14:02:12 +0100
+
+nemo (5.8.5-2) unstable; urgency=medium
+
+  * Release to unstable
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Fri, 29 Sep 2023 13:41:57 +0200
+
+nemo (5.8.5-1) experimental; urgency=medium
+
+  * New upstream bugfix version 5.8.5
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sat, 23 Sep 2023 11:15:36 +0200
+
+nemo (5.8.4-1) experimental; urgency=medium
+
+  * New upstream version 5.8.4
+  * Bump reverse dep breaks to 5.8
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Fri, 14 Jul 2023 13:24:43 +0200
+
+nemo (5.6.5-1) unstable; urgency=medium
+
+  * New upstream bigfix version 5.6.5
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Fri, 26 May 2023 11:28:24 +0200
+
+nemo (5.6.4-1) unstable; urgency=medium
+
+  * New upstream bugfix version 5.6.4
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 19 Mar 2023 22:36:15 +0100
+
+nemo (5.6.3-1) unstable; urgency=medium
+
+  * New upstream version 5.6.3
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 22 Jan 2023 19:08:11 +0100
+
+nemo (5.6.2-1) unstable; urgency=medium
+
+  * New upstream version 5.6.2
+  * Update standards version to 4.6.2, no changes needed
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 08 Jan 2023 17:13:36 +0100
+
+nemo (5.6.1-2) unstable; urgency=medium
+
+  * Release to unstable
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 25 Dec 2022 19:00:44 +0100
+
+nemo (5.6.1-1) experimental; urgency=medium
+
+  [ Debian Janitor ]
+  * Remove constraints unnecessary since buster (oldstable)
+
+  [ Fabio Fantoni ]
+  * New upstream version 5.6.1
+  * d/control: remove xapp from nemo deps
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Tue, 20 Dec 2022 20:01:22 +0100
+
+nemo (5.4.3-2) unstable; urgency=medium
+
+  * Release to unstable
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 14 Aug 2022 15:25:44 +0200
+
+nemo (5.4.3-1) experimental; urgency=medium
+
+  * New upstream version 5.4.3
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sat, 13 Aug 2022 14:43:57 +0200
+
+nemo (5.4.2-1) experimental; urgency=medium
+
+  * New upstream version 5.4.2 (LP: #1945903)
+  * d/control: add html2text to nemo recommends
+  * Update lintian override
+  * Update d/copyright
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Thu, 21 Jul 2022 23:23:44 +0200
+
+nemo (5.4.0-1) experimental; urgency=medium
+
+  [ Debian Janitor ]
+  * Trim trailing whitespace.
+  * gir1.2-nemo-3.0: Add Multi-Arch: same.
+
+  [ Fabio Fantoni ]
+  * New upstream version 5.4.0
+  * d/control: replace texlive-binaries with untex in nemo
+    recommends (Closes: #1006472)
+  * Simplify d/watch
+  * d/control:
+    - remove libnotify-dev from build-deps
+    - remove old breaks/replaces
+    - bump some deps and reverse-deps breaks to 5.4
+  * Bumped Standards-Version to 4.6.1
+  * Remove empty d/patches/series
+  * Restrict selinux build-dep and configure option to linux-any
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 10 Jul 2022 22:58:57 +0200
+
+nemo (5.2.4-1) unstable; urgency=medium
+
+  [ Fabio Fantoni ]
+  * New upstream version 5.2.4
+  * d/control: add python3:any to nemo deps
+
+  [ Christoph Martin ]
+  * add myself to uploaders
+  * prepare unstable release
+
+ -- Christoph Martin <martin@uni-mainz.de>  Wed, 26 Jan 2022 08:56:06 +0100
+
+nemo (5.2.2-1) experimental; urgency=medium
+
+  [ Joshua Peisach ]
+  * Fix watch file
+  * Add myself to Uploaders
+  * Remove --as-needed linker flag
+  * Remove patch applied upstream
+  * Add missing Build-Depends-Package in symbols file
+  * Bump cinnamon deps and breaks to 5.2.0
+
+  [ Fabio Fantoni ]
+  * New upstream version 5.2.2
+  * update xapp deps for package split of 2.2.5-1
+  * add python3-xlrd to nemo recommends for xls search helper
+
+ -- Joshua Peisach <itzswirlz2020@outlook.com>  Mon, 22 Nov 2021 19:55:07 -0500
+
 nemo (5.0.5-1) unstable; urgency=medium
 
   * New upstream version 5.0.5

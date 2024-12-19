@@ -366,15 +366,15 @@ static void
 custom_app_set (NemoMimeApplicationChooser *chooser,
                 GtkFileChooser             *dialog)
 {
-    gchar *unescaped = gtk_file_chooser_get_filename (dialog);
-    gchar *escaped = eel_str_escape_spaces (unescaped);
+    gchar *unquoted = gtk_file_chooser_get_filename (dialog);
+    gchar *quoted = g_shell_quote (unquoted);
 
-    gtk_entry_set_text (GTK_ENTRY (chooser->details->custom_entry), escaped);
+    gtk_entry_set_text (GTK_ENTRY (chooser->details->custom_entry), quoted);
     gtk_widget_grab_focus (chooser->details->custom_entry);
     gtk_editable_set_position (GTK_EDITABLE (chooser->details->custom_entry), -1);
 
-    g_free (unescaped);
-    g_free (escaped);
+    g_free (unquoted);
+    g_free (quoted);
 }
 
 static char *
@@ -661,8 +661,9 @@ nemo_mime_application_chooser_finalize (GObject *object)
 
 	g_free (chooser->details->uri);
 	g_free (chooser->details->content_type);
-    if (chooser->details->custom_info != NULL)
+    if (chooser->details->custom_info != NULL) {
         g_object_unref (chooser->details->custom_info);
+    }
 
 	G_OBJECT_CLASS (nemo_mime_application_chooser_parent_class)->finalize (object);
 }
@@ -777,7 +778,7 @@ nemo_mime_application_chooser_get_info (NemoMimeApplicationChooser *chooser)
     if (chooser->details->custom_info == NULL)
         return gtk_app_chooser_get_app_info (GTK_APP_CHOOSER (chooser->details->open_with_widget));
     else
-        return chooser->details->custom_info;
+        return g_object_ref (chooser->details->custom_info);
 }
 
 const gchar *

@@ -31,6 +31,7 @@
 #include "nemo-application.h"
 #include "nemo-progress-info-widget.h"
 
+#include <gio/gio.h>
 #include <glib/gi18n.h>
 
 #include <eel/eel-string.h>
@@ -38,7 +39,6 @@
 #include <libnemo-private/nemo-progress-info.h>
 #include <libnemo-private/nemo-progress-info-manager.h>
 
-#include <libnotify/notify.h>
 #include <libxapp/xapp-gtk-window.h>
 #include <libxapp/xapp-status-icon.h>
 
@@ -81,7 +81,7 @@ progress_ui_handler_ensure_status_icon (NemoProgressUIHandler *self)
 	}
 
     status_icon = xapp_status_icon_new ();
-    xapp_status_icon_set_icon_name (status_icon, "progress-0-symbolic");
+    xapp_status_icon_set_icon_name (status_icon, "nemo-progress-0-symbolic");
     g_signal_connect (status_icon, "activate",
                       (GCallback) status_icon_activate_cb,
                       self);
@@ -103,7 +103,7 @@ get_icon_name_from_percent (guint pct)
     else
         rounded = pct + (10 - ones);
 
-    icon_name = g_strdup_printf ("progress-%d", rounded);
+    icon_name = g_strdup_printf ("nemo-progress-%d-symbolic", rounded);
 
     return icon_name;
 }
@@ -202,6 +202,7 @@ progress_ui_handler_ensure_window (NemoProgressUIHandler *self)
 	progress_window = xapp_gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	self->priv->progress_window = progress_window;
 
+    gtk_window_set_type_hint (GTK_WINDOW (progress_window), GDK_WINDOW_TYPE_HINT_DIALOG);
     gtk_window_set_resizable (GTK_WINDOW (progress_window), FALSE);
     gtk_window_set_default_size (GTK_WINDOW (progress_window), 500, -1);
 
@@ -261,13 +262,12 @@ progress_ui_handler_add_to_window (NemoProgressUIHandler *self,
 static void
 progress_ui_handler_show_complete_notification (NemoProgressUIHandler *self)
 {
-	NotifyNotification *complete_notification;
+	GNotification *complete_notification;
 
-	complete_notification = notify_notification_new (_("File Operations"),
-							 _("All file operations have been successfully completed"),
-							 NULL);
-	notify_notification_show (complete_notification, NULL);
-
+	complete_notification = g_notification_new (_("File Operations"));
+	g_notification_set_body (complete_notification, _("All file operations have been successfully completed"));
+	
+	g_application_send_notification (G_APPLICATION (nemo_application_get_singleton ()), NULL, complete_notification);
 	g_object_unref (complete_notification);
 }
 
@@ -385,7 +385,7 @@ timeout_data_free (TimeoutData *data)
 	g_clear_object (&data->self);
 	g_clear_object (&data->info);
 
-	g_slice_free (TimeoutData, data);
+	g_free (data);
 }
 
 static TimeoutData *
@@ -394,7 +394,7 @@ timeout_data_new (NemoProgressUIHandler *self,
 {
 	TimeoutData *retval;
 
-	retval = g_slice_new0 (TimeoutData);
+	retval = g_new0 (TimeoutData, 1);
 	retval->self = g_object_ref (self);
 	retval->info = g_object_ref (info);
 

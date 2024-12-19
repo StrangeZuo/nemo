@@ -100,6 +100,7 @@ typedef struct {
 	gboolean skip_all_error;
 	gboolean skip_all_conflict;
 	gboolean merge_all;
+	gboolean auto_rename_all;
 	gboolean replace_all;
 	gboolean delete_all;
 } CommonJob;
@@ -408,7 +409,7 @@ get_link_name (const char *name, int count, int max_length)
 		 */
 		switch (count % 10) {
 		case 1:
-			/* Localizers: Feel free to leave out the "st" suffix
+			/* Localizers: Feel free to leave out the "st" suffix                                 codespell:ignore
 			 * if there's no way to do that nicely for a
 			 * particular language.
 			 */
@@ -458,7 +459,7 @@ get_link_name (const char *name, int count, int max_length)
 
 
 /* Localizers:
- * Feel free to leave out the st, nd, rd and th suffix or
+ * Feel free to leave out the st, nd, rd and th suffix or                codespell:ignore
  * make some or all of them match.
  */
 
@@ -825,15 +826,22 @@ custom_basename_to_string (char *format, va_list va)
 		g_object_unref (info);
 	}
 
-	if (name == NULL) {
-		basename = g_file_get_basename (file);
-		if (g_utf8_validate (basename, -1, NULL)) {
-			name = basename;
-		} else {
-			name = g_uri_escape_string (basename, G_URI_RESERVED_CHARS_ALLOWED_IN_PATH, TRUE);
-			g_free (basename);
-		}
-	}
+    if (name == NULL) {
+        basename = g_file_get_basename (file);
+
+        if (basename != NULL) {
+            if (g_utf8_validate (basename, -1, NULL)) {
+                name = basename;
+            } else {
+                name = g_uri_escape_string (basename, G_URI_RESERVED_CHARS_ALLOWED_IN_PATH, TRUE);
+                g_free (basename);
+            }
+        }
+    }
+
+    if (name == NULL) {
+        name = g_file_get_parse_name (file);
+    }
 
 	/* Some chars can't be put in the markup we use for the dialogs... */
 	if (has_invalid_xml_char (name)) {
@@ -953,6 +961,10 @@ get_best_name (GFile *file, gchar **name)
         g_free (path);
     } else {
         out = g_file_get_basename (file);
+
+        if (out == NULL) {
+            out = g_file_get_parse_name (file);
+        }
     }
 
     *name = out;
@@ -3422,6 +3434,7 @@ make_file_name_valid_for_dest_fs (char *filename,
              * This assumption is a pragmatic way to solve
              * https://gitlab.gnome.org/GNOME/nautilus/-/issues/1343 */
 		    !strcmp (dest_fs_type, "fuse") ||
+		    !strcmp (dest_fs_type, "exfat") ||
 		    !strcmp (dest_fs_type, "ntfs") ||
 		    !strcmp (dest_fs_type, "msdos") ||
 		    !strcmp (dest_fs_type, "msdosfs")) {
@@ -4228,7 +4241,7 @@ is_trusted_desktop_file (GFile *file,
 	}
 
 	basename = g_file_get_basename (file);
-	if (!g_str_has_suffix (basename, ".desktop")) {
+	if (basename && !g_str_has_suffix (basename, ".desktop")) {
 		g_free (basename);
 		return FALSE;
 	}
@@ -4315,13 +4328,13 @@ run_conflict_dialog (CommonJob *job,
 
 	g_timer_stop (job->time);
 
-	data = g_slice_new0 (ConflictDialogData);
+	data = g_new0 (ConflictDialogData, 1);
 	data->parent = job->parent_window;
 	data->src = src;
 	data->dest = dest;
 	data->dest_dir = dest_dir;
 
-	resp_data = g_slice_new0 (ConflictResponseData);
+	resp_data = g_new0 (ConflictResponseData, 1);
 	resp_data->new_name = NULL;
 	data->resp_data = resp_data;
 
@@ -4332,7 +4345,7 @@ run_conflict_dialog (CommonJob *job,
 					     NULL);
 	nemo_progress_info_resume (job->progress);
 
-	g_slice_free (ConflictDialogData, data);
+	g_free (data);
 
 	g_timer_continue (job->time);
 
@@ -4343,7 +4356,7 @@ static void
 conflict_response_data_free (ConflictResponseData *data)
 {
 	g_free (data->new_name);
-	g_slice_free (ConflictResponseData, data);
+	g_free (data);
 }
 
 static GFile *
@@ -4616,7 +4629,7 @@ copy_move_file (CopyMoveJob *copy_job,
 
 		g_error_free (error);
 
-		if (unique_names) {
+		if (unique_names || job->auto_rename_all) {
 			g_object_unref (dest);
 			dest = get_unique_target_file (src, dest_dir, same_fs, *dest_fs_type, unique_name_nr++);
 			goto retry;
@@ -4664,6 +4677,13 @@ copy_move_file (CopyMoveJob *copy_job,
 			g_object_unref (dest);
 			dest = get_target_file_for_display_name (dest_dir,
 								 resp->new_name);
+			conflict_response_data_free (resp);
+			goto retry;
+		} else if (resp->id == CONFLICT_RESPONSE_AUTO_RENAME) {
+			if (resp->apply_to_all) {
+				job->auto_rename_all = TRUE;
+			}
+			unique_names = TRUE;
 			conflict_response_data_free (resp);
 			goto retry;
 		} else {
@@ -5130,12 +5150,14 @@ move_file_prepare (CopyMoveJob *move_job,
 	GError *error;
 	CommonJob *job;
 	gboolean overwrite;
+	gboolean auto_rename;
 	char *primary, *secondary, *details;
 	int response;
 	GFileCopyFlags flags;
 	MoveFileCopyFallback *fallback;
 	gboolean handled_invalid_filename;
     gboolean target_is_desktop, source_is_desktop;
+	int unique_name_nr = 1;
 
     target_is_desktop = (move_job->desktop_location != NULL &&
                          g_file_equal (move_job->desktop_location, dest_dir));
@@ -5152,6 +5174,8 @@ move_file_prepare (CopyMoveJob *move_job,
     }
 
 	overwrite = FALSE;
+    auto_rename = FALSE;
+
 	handled_invalid_filename = *dest_fs_type != NULL;
 
 	job = (CommonJob *)move_job;
@@ -5275,6 +5299,12 @@ move_file_prepare (CopyMoveJob *move_job,
 			goto retry;
 		}
 
+		if (job->auto_rename_all || auto_rename) {
+			g_object_unref (dest);
+			dest = get_unique_target_file (src, dest_dir, same_fs, *dest_fs_type, unique_name_nr++);
+			goto retry;
+		}
+
 		if (job->skip_all_conflict) {
 			goto out;
 		}
@@ -5305,6 +5335,13 @@ move_file_prepare (CopyMoveJob *move_job,
 			g_object_unref (dest);
 			dest = get_target_file_for_display_name (dest_dir,
 								 resp->new_name);
+			conflict_response_data_free (resp);
+			goto retry;
+		} else if (resp->id == CONFLICT_RESPONSE_AUTO_RENAME) {
+			if (resp->apply_to_all) {
+				job->auto_rename_all = TRUE;
+			}
+			auto_rename = TRUE;
 			conflict_response_data_free (resp);
 			goto retry;
 		} else {
@@ -6174,7 +6211,7 @@ callback_for_move_to_trash (GHashTable *debuting_uris,
 {
 	if (data->real_callback)
 		data->real_callback (debuting_uris, !user_cancelled, data->real_data);
-	g_slice_free (MoveTrashCBData, data);
+	g_free (data);
 }
 
 void
@@ -6249,7 +6286,7 @@ nemo_file_operations_copy_move (const GList *item_uris,
 		if (g_file_has_uri_scheme (dest, "trash")) {
 			MoveTrashCBData *cb_data;
 
-			cb_data = g_slice_new0 (MoveTrashCBData);
+			cb_data = g_new0 (MoveTrashCBData, 1);
 			cb_data->real_callback = done_callback;
 			cb_data->real_data = done_callback_data;
 

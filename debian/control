@@ -6,39 +6,41 @@ Uploaders:
  Maximiliano Curia <maxy@debian.org>,
  Margarita Manterola <marga@debian.org>,
  Fabio Fantoni <fantonifabio@tiscali.it>,
- Norbert Preining <norbert@preining.info>
+ Norbert Preining <norbert@preining.info>,
+ Joshua Peisach <itzswirlz2020@outlook.com>,
+ Christoph Martin <martin@uni-mainz.de>
 Build-Depends:
- cinnamon-l10n (>= 5.0~),
+ cinnamon-l10n (>= 6.2~),
  debhelper-compat (= 13),
  dh-sequence-gir,
  dh-sequence-python3,
- gtk-doc-tools (>= 1.4),
- intltool (>= 0.40.1),
+ gtk-doc-tools,
+ intltool,
  itstool,
- libatk1.0-dev (>= 1.32.0),
- libcinnamon-desktop-dev (>= 5.0~),
- libexempi-dev (>= 2.2.0),
- libexif-dev (>= 0.6.20),
+ libatk1.0-dev,
+ libcinnamon-desktop-dev (>= 6.2~),
+ libexempi-dev,
+ libexif-dev,
  libgail-3-dev,
- libgirepository1.0-dev (>= 0.9.12),
- libglib2.0-dev (>= 2.45.7),
+ libgirepository1.0-dev,
+ libglib2.0-dev,
  libglib2.0-doc,
  libgsf-1-dev,
- libgtk-3-dev (>= 3.10.0),
+ libgtk-3-dev,
  libgtk-3-doc,
- libnotify-dev (>= 0.7.0),
+ libjson-glib-dev,
  libpango1.0-dev,
- libselinux1-dev,
+ libselinux1-dev [linux-any],
  libx11-dev,
  libxapp-dev (>= 2.0.0~),
  libxext-dev,
- libxml2-dev (>= 2.7.8),
+ libxml2-dev,
  libxrender-dev,
- meson (>= 0.40.0),
+ meson,
  python3,
  python3-gi,
  x11proto-core-dev,
-Standards-Version: 4.5.0
+Standards-Version: 4.7.0
 Rules-Requires-Root: no
 Homepage: http://cinnamon.linuxmint.com/
 Vcs-Browser: https://salsa.debian.org/cinnamon-team/nemo
@@ -56,15 +58,16 @@ Description: libraries for nemo components - gir bindings
  .
  This package can be used by other packages using the GIRepository format to
  generate dynamic bindings.
-Breaks: nemo-python (<< 5.0~)
+Breaks: nemo-python (<< 5.2~)
+Multi-Arch: same
 
 Package: libnemo-extension-dev
 Architecture: any
 Section: libdevel
 Depends:
  gir1.2-nemo-3.0 (= ${binary:Version}),
- libglib2.0-dev (>= 2.45.7),
- libgtk-3-dev (>= 3.9.10),
+ libglib2.0-dev,
+ libgtk-3-dev,
  libnemo-extension1 (= ${binary:Version}),
  ${misc:Depends},
 Description: Nemo component system facilities (development files)
@@ -88,37 +91,38 @@ Description: Nemo component system facilities
  desktop. It works on local and remote filesystems.
  .
  This package contains the shared library needed by the nemo extensions.
-Breaks: nemo-fileroller (<< 5.0~), nemo-python (<< 5.0~)
+Breaks: nemo-fileroller (<< 5.2~), nemo-python (<< 5.2~)
 
 Package: nemo
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends:
- cinnamon-desktop-data (>= 5.0~),
- desktop-file-utils (>= 0.7),
+ cinnamon-desktop-data (>= 6.2~),
+ desktop-file-utils,
  gsettings-desktop-schemas,
- gvfs (>= 1.3.2),
- libcinnamon-desktop4 (>= 5.0~),
+ gvfs,
  libglib2.0-data,
  libnemo-extension1 (= ${binary:Version}),
- libxapp1 (>= 1.4),
  nemo-data (= ${source:Version}),
- shared-mime-info (>= 0.50),
+ shared-mime-info,
  ${misc:Depends},
  ${shlibs:Depends},
 Recommends:
  catdoc,
- cinnamon-l10n (>= 5.0~),
+ cinnamon-l10n (>= 6.2~),
  exif,
  gnome-disk-utility,
  gvfs-backends,
  gvfs-fuse,
+ html2text,
  id3,
  librsvg2-common,
- nemo-fileroller (>= 5.0~),
+ nemo-fileroller (>= 5.2~),
  odt2txt,
  poppler-utils,
- texlive-binaries,
+ python3-xlrd,
+ python3:any,
+ untex,
 Suggests: eog, evince | pdf-viewer, totem | mp3-decoder, xdg-user-dirs
 Description: File manager and graphical shell for Cinnamon
  Nemo is the official file manager for the Cinnamon desktop. It allows one
@@ -128,14 +132,12 @@ Description: File manager and graphical shell for Cinnamon
  .
  Several icon themes and components for viewing different kinds of files
  are available in separate packages.
-Breaks: cinnamon (<< 5.0~), cinnamon-core (<< 5.0~), nemo-fileroller (<< 5.0~)
+Breaks: cinnamon (<< 6.2~), cinnamon-core (<< 5.4~), nemo-fileroller (<< 5.2~)
 
 Package: nemo-data
 Architecture: all
-Depends: python3, ${misc:Depends}, ${python3:Depends}
+Depends: python3:any, ${misc:Depends}, ${python3:Depends}
 Suggests: nemo
-Replaces: nemo (<< 3.6.5-1~)
-Breaks: nemo (<< 3.6.5-1~)
 Description: File manager and graphical shell for Cinnamon (data files)
  Nemo is the official file manager for the Cinnamon desktop. It allows one
  to browse directories, preview files and launch applications associated
